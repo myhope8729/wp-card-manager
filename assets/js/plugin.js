@@ -2,7 +2,7 @@ jQuery(document).ready(function($){
 	if ( $('.card-modal').length > 0 ){
 		WebFont.load({
 			google: {
-				families: ["Abril Fatface", "Acme", "Amatic SC", "Baloo Chettan 2", "Dancing Script", "Lobster", "Montserrat", "Muli", "Pacifico", "Permanent Marker", "Roboto", "Sen", "Shadows Into Light"]
+				families: ["Abril Fatface", "Acme", "Alfa Slab One", "Amatic SC", "Amiri", "Bangers", "Bebas Neue", "Bree Serif", "Cookie", "Dancing Script", "Fredoka One", "Great Vibes", "Lateef", "Lobster", "Luckiest Guy", "Merriweather", "Pacifico", "Passion One", "Playfair Display", "Rancho", "Roboto", "Roboto Slab", "Rochester", "Sacramento", "Sen"]
 			}
 		});
 	}
@@ -141,7 +141,7 @@ jQuery(document).ready(function($){
 		if ( $('.card-back').length > 0 ){
 			WebFont.load({
 				google: {
-					families: ["Abril Fatface", "Acme", "Amatic SC", "Baloo Chettan 2", "Dancing Script", "Lobster", "Montserrat", "Muli", "Pacifico", "Permanent Marker", "Roboto", "Sen", "Shadows Into Light"]
+					families: ["Abril Fatface", "Acme", "Alfa Slab One", "Amatic SC", "Amiri", "Bangers", "Bebas Neue", "Bree Serif", "Cookie", "Dancing Script", "Fredoka One", "Great Vibes", "Lateef", "Lobster", "Luckiest Guy", "Merriweather", "Pacifico", "Passion One", "Playfair Display", "Rancho", "Roboto", "Roboto Slab", "Rochester", "Sacramento", "Sen"]
 				}
 			});
 

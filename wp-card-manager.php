@@ -129,10 +129,42 @@ class wp_card_manager{
 	public function plugin_card_view() {
 		global $wpdb;
 		$tbl_cards = $wpdb->prefix . 'ecards';
-		
-		$cards_sql = "SELECT * FROM {$tbl_cards} ";
-		$cards = $wpdb->get_results($cards_sql);
+
+		$pagenum = isset( $_GET['pagenum'] ) ? absint( $_GET['pagenum'] ) : 1;      
+
+        $limit = 10; // number of rows in page
+        $offset = ( $pagenum - 1 ) * $limit;
+        $total = $wpdb->get_var( "select count(*) as total from $tbl_cards" );
+        $num_of_pages = ceil( $total / $limit );
+
+        $cards = $wpdb->get_results( "SELECT * FROM $tbl_cards ORDER BY send_date DESC limit  $offset, $limit" );
+        $rowcount = $wpdb->num_rows;
+
 ?>
+<style type="text/css">
+.tablenav-pages .page-numbers{
+	display: inline-block;
+    vertical-align: baseline;
+    min-width: 30px;
+    min-height: 30px;
+    margin: 0;
+    padding: 0 4px;
+    font-size: 16px;
+    line-height: 1.625;
+    text-align: center;
+    border-width: 1px;
+    border-style: solid;
+    -webkit-appearance: none;
+    border-radius: 3px;
+    white-space: nowrap;
+    box-sizing: border-box;
+    text-decoration: none;
+}
+
+.tablenav-pages .page-numbers.current, .tablenav-pages .page-numbers.dots{
+	border-color:transparent;
+}
+</style>
 		<div class="wrap">
 			<h2>Sent Cards</h2>
 			<table class="widefat wp-list-table" style="width:100%">
@@ -146,7 +178,7 @@ class wp_card_manager{
 				</thead>
 				<tbody>
 <?php
-		if(!empty($cards)){
+		if( $rowcount > 0 ){
 			foreach($cards as $card){
 ?>
 				<tr>
@@ -163,6 +195,18 @@ class wp_card_manager{
 			</table>
 		</div>
 <?php
+		$page_links = paginate_links( array(
+            'base' => add_query_arg( 'pagenum', '%#%' ),
+            'format' => '',
+            'prev_text' => __( '&laquo;', 'text-domain' ),
+            'next_text' => __( '&raquo;', 'text-domain' ),
+            'total' => $num_of_pages,
+            'current' => $pagenum
+        ) );
+
+        if ( $page_links ) {
+            echo '<div class="tablenav" style="width: 99%;"><div class="tablenav-pages" style="margin: 1em 0">' . $page_links . '</div></div>';
+        }
 	}
 
 	public function plugin_setting(){
@@ -550,7 +594,7 @@ class wp_card_manager{
 	    );
 		wp_localize_script( 'plugin-js', 'ajaxObj', $ajaxObj );
 
-		$fonts = array("Abril Fatface", "Acme", "Amatic SC", "Baloo Chettan 2", "Dancing Script", "Lobster", "Montserrat", "Muli", "Pacifico", "Permanent Marker", "Roboto", "Sen", "Shadows Into Light");
+		$fonts = array("Abril Fatface", "Acme", "Alfa Slab One", "Amatic SC", "Amiri", "Bangers", "Bebas Neue", "Bree Serif", "Cookie", "Dancing Script", "Fredoka One", "Great Vibes", "Lateef", "Lobster", "Luckiest Guy", "Merriweather", "Pacifico", "Passion One", "Playfair Display", "Rancho", "Roboto", "Roboto Slab", "Rochester", "Sacramento", "Sen");
 
 		$colors = array( "#000000", "#FFB400", "#E53D39", "#2C91DE", '#FFFFFF', '#970E65', '#650633', '#F3A2A3', '#D44F70', '#CA0B15', '#97070E', '#650508', '#F35D19', '#9E5727', '#D8B571', '#978454', '#65320C', '#8793D6', '#866AA5', '#552978', '#1D549F', '#073464', '#55B2AE', '#686868', '#D5D5D5', '#FFFAA3', '#C0CFAF', '#469E57' );
 		
