@@ -12,13 +12,6 @@
 
 if ( !class_exists( 'wp_card_manager' ) ):
 class wp_card_manager{
-
-	/**
-	 * Plugin instance method.
-	 *
-	 * Define all actions and filters, shortcodes that plugins will use.
-	 *
-	 */
 	public function instance() {
 		add_action( 'init', array( $this, 'plugin_init' ) );
 		add_action( 'admin_menu', array( $this, 'plugin_admin_menu' ) );
@@ -40,19 +33,10 @@ class wp_card_manager{
 		//register_deactivation_hook( __FILE__, array( $this, 'plugin_deactivate' ) );
 	}
 
-
-	/**
-	 * Plugin activate method.
-	 *
-	 * Create all tables that plugin use and create page for ecard.
-	 *
-	 * @global $wpdb
-	 */
 	public function plugin_activate() {
 		global $wpdb;
 		$charset_collate = $wpdb->get_charset_collate();
 
-		// Create cards table
 		$sql_cards = "CREATE TABLE `{$wpdb->prefix}ecards` (
 			id MEDIUMINT NOT NULL AUTO_INCREMENT,
 			card_id varchar(24),
@@ -64,22 +48,12 @@ class wp_card_manager{
 			PRIMARY KEY (id)
 		) $charset_coolate;";
 
-
-		/* 
-		 * Create message category table
-		 * It manages categories of suggested messages
-		 * It will managed admin area
-		 */
 		$sql_msg_cats = "CREATE TABLE `{$wpdb->prefix}msg_category` (
 			id MEDIUMINT NOT NULL AUTO_INCREMENT,
 			cat_name varchar(40),
 			PRIMARY KEY (id)
 		) $charset_coolate;";
 
-		/* 
-		 * Create Suggested messages table
-		 * These messages are predefined messages to send.
-		 */
 		$sql_messages = "CREATE TABLE `{$wpdb->prefix}card_messages` (
 			id MEDIUMINT NOT NULL AUTO_INCREMENT,
 			cat_id varchar(40),
@@ -105,14 +79,7 @@ class wp_card_manager{
 		add_option( 'card_view_page_id', $page_id );
 	}
 
-	/**
-	 * Plugin activate method.
-	 *
-	 * Delete card table and created ecard page.
-	 * This method is unused temporary.
-	 *
-	 * @global $wpdb
-	 */
+	// Disabled temporary for now.
 	public function plugin_deactivate() {
 		global $wpdb;
 		$tbl_cards = $wpdb->prefix . 'ecards';
@@ -127,29 +94,14 @@ class wp_card_manager{
 		wp_unschedule_event( $timestamp, 'cron_delete_cards' );
 	}
 
-	/**
-	 * Plugin Init method.
-	 *
-	 * Define rewrite rule for ecard view
-	 * Called by init action
-	 *
-	 */
 	public function plugin_init() {
 		$page_id = get_option( 'card_view_page_id' );
 
-		// Redirect all ecard request to ECard page.
 		add_rewrite_rule( '^ecard/(.*)/?', 'index.php?page_id='.$page_id.'&card_id=$matches[1]', 'top' );
 		add_rewrite_tag('%card_id%', '([^&/]+)');
 		flush_rewrite_rules();
 	}
 
-	/**
-	 * Plugin Admin Menu 
-	 *
-	 * Define Menus for plugin in Admin area
-	 * Called by admin_menu action
-	 *
-	 */
 	public function plugin_admin_menu() {
 		add_menu_page( 'Cards', 'Cards', 'manage_options', 'card_manager', array( $this, 'plugin_card_view' ), 'dashicons-email-alt2' );
 		add_submenu_page( 'card_manager', 'Cards', 'Sent Cards', 'manage_options', 'card_manager', array( $this, 'plugin_card_view' ) );
@@ -160,13 +112,6 @@ class wp_card_manager{
 		add_submenu_page( NULL, 'Edit message', 'Edit message', 'manage_options', 'edit_card_message', array( $this, 'plugin_edit_card_message' ) );
 	}
 
-	/**
-	 * Plugin Styles Register
-	 *
-	 * Include all styles and scripts which uses in frontend for plugin
-	 * Called by wp_enqueue_scripts action
-	 *
-	 */
 	public function plugin_register_styles() {
 		wp_enqueue_style( 'bootstrap4', 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css' );
 		wp_enqueue_style( 'fontawesome', 'https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css' );
@@ -177,25 +122,10 @@ class wp_card_manager{
 		wp_enqueue_script( 'plugin-js', plugin_dir_url( __FILE__ ). 'assets/js/plugin.js', array('jquery'), '1.0.0', true );
 	}
 
-	/**
-	 * Plugin Admin Styles Register
-	 *
-	 * Include admin js file 
-	 * Called by admin_enqueue_scripts action
-	 *
-	 */
 	public function plugin_register_admin_script(){
 		wp_enqueue_script( 'card-admin-js', plugin_dir_url( __FILE__ ). 'assets/js/card-admin.js', array('jquery'), '1.0.0', true );
 	}
 
-	/**
-	 * Plugin List Card Page
-	 *
-	 * View sent ecards
-	 * Show on Cards and Sent Cards menus
-	 *
-	 * @global $wpdb
-	 */
 	public function plugin_card_view() {
 		global $wpdb;
 		$tbl_cards = $wpdb->prefix . 'ecards';
@@ -207,7 +137,6 @@ class wp_card_manager{
         $total = $wpdb->get_var( "select count(*) as total from $tbl_cards" );
         $num_of_pages = ceil( $total / $limit );
 
-        // List all cards what has been sent.
         $cards = $wpdb->get_results( "SELECT * FROM $tbl_cards ORDER BY send_date DESC limit  $offset, $limit" );
         $rowcount = $wpdb->num_rows;
 
@@ -280,26 +209,14 @@ class wp_card_manager{
         }
 	}
 
-	/**
-	 * Plugin Admin Setting page.
-	 *
-	 * Settings : cron period - When will delete old ecards
-	 * 			  Show on Cards and Sent Cards menus
-	 *
-	 * Called by Settings menu in admin
-	 */
 	public function plugin_setting(){
 		if ( isset( $_REQUEST['save'] ) ){
-			// Update options when user save settings
 			update_option( 'card_delete_period', $_REQUEST['cron_period'] );
 			update_option( 'card_show_image_shortcode', $_REQUEST['show_image'] );
 
-
-			// Remove current registered cron schedule
 			$timestamp = wp_next_scheduled( 'cron_delete_cards' );
 			wp_unschedule_event( $timestamp, 'cron_delete_cards' );
 
-			// Get cron period from option and set new schedule for delete cards
 			$cron_period = get_option( 'card_delete_period' );
 			if ( !empty( $cron_period ) ){
 				if( !wp_next_scheduled( 'cron_delete_cards' ) ) {
@@ -346,27 +263,15 @@ class wp_card_manager{
 <?php
 	}
 
-	/**
-	 * Plugin Admin Categories page.
-	 *
-	 * Manage suggested message categories
-	 *
-	 * Called by Messages Categories menu in admin
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_message_categories() {
 		global $wpdb;
 		$tbl_msg_cats = $wpdb->prefix . 'msg_category';
 
-		// Insert new category to table
 		if ( isset( $_REQUEST['add_category'] ) ) {
 			$category_name = $_REQUEST['category_name'];
 			$wpdb->insert( $tbl_msg_cats, array( 'cat_name' => $category_name ) );
 		}
 		
-		// Get all categories
 		$cats_sql = "SELECT * FROM {$tbl_msg_cats} ";
 		$categories = $wpdb->get_results($cats_sql);
 ?>
@@ -434,22 +339,11 @@ class wp_card_manager{
 <?php
 	}
 
-	/**
-	 * Plugin Admin Edit Categories page.
-	 *
-	 * Edit selected category
-	 *
-	 * Called by Edit link from category table
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_edit_msg_category() {
 		global $wpdb;
 		$category_id = $_REQUEST['category_id'];
 		$tbl_msg_cats = $wpdb->prefix . 'msg_category';
 
-		// Save category
 		if ( isset( $_REQUEST['save_category'] ) ){
 			$category_name = $_REQUEST['category_name'];
 
@@ -457,7 +351,6 @@ class wp_card_manager{
 			$is_updated = true;
 		}
 
-		// Get Category object that user wants to edit
 		$sql_msg_cats = "SELECT * FROM {$tbl_msg_cats} WHERE id=".$category_id;
 		$category_obj = $wpdb->get_row( $sql_msg_cats );
 ?>
@@ -496,16 +389,6 @@ class wp_card_manager{
 <?php
 	}
 
-	/**
-	 * Plugin Admin Delete Categories page.
-	 *
-	 * Delete selected category
-	 *
-	 * Called by Delete link from category table
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_delete_msg_category() {
 		global $wpdb;
 		$category_id = $_REQUEST['category_id'];
@@ -515,29 +398,17 @@ class wp_card_manager{
 		exit;
 	}
 
-	/**
-	 * Plugin Admin Message management page.
-	 *
-	 * Manage suggested message for card
-	 *
-	 * Called by Messages menu from Admin
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_message_manager() {
 		global $wpdb;
 		$tbl_msg_cats = $wpdb->prefix . 'msg_category';
 		$tbl_message = $wpdb->prefix . 'card_messages';
 
-		// Add message to table
 		if ( isset( $_REQUEST['add_message'] ) ) {
 			$message_content = $_REQUEST['message_content'];
 			$category_id = $_REQUEST['cat_id'];
 			$wpdb->insert( $tbl_message, array( 'cat_id' => $category_id, 'message_content' => $message_content ) );
 		}
-
-		// Get all messages by category		
+		
 		$message_sql = "SELECT a.id, a.message_content, b.cat_name FROM {$tbl_message} a JOIN {$tbl_msg_cats} b ON a.cat_id = b.id ORDER BY b.id ASC, a.cat_id DESC";
 		$messages = $wpdb->get_results($message_sql);
 
@@ -623,16 +494,6 @@ class wp_card_manager{
 <?php
 	}
 
-	/**
-	 * Plugin Admin Edit Message page.
-	 *
-	 * Edit selected suggested message for card
-	 *
-	 * Called by Edit link from Messages list
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_edit_card_message() {
 		global $wpdb;
 		
@@ -706,16 +567,6 @@ class wp_card_manager{
 <?php
 	}
 
-	/**
-	 * Plugin Admin Delete Message page.
-	 *
-	 * Delete selected suggested message for card
-	 *
-	 * Called by Delete link from Messages list
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_delete_card_message() {
 		global $wpdb;
 		$message_id = $_REQUEST['message_id'];
@@ -725,21 +576,10 @@ class wp_card_manager{
 		exit;
 	}
 
-	/**
-	 * Plugin Ecard shortcode for sender.
-	 *
-	 * Display card image and send button and design form.
-	 * Shortcode - [ecard show_image=true related="3,4,2"]
-	 * 			show_image : display card image to page or not
-	 *			related : Related posts to show on ecard view page
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_shortcode_ecard( $attributes, $image = null ) {
 		global $wpdb;
 		
-		// Prepare suggested messages and its categories for "Suggested messages" on design form
+		$msg_id = $_REQUEST['msg_id'];
 		$tbl_msg_cats = $wpdb->prefix . 'msg_category';
 		$tbl_message = $wpdb->prefix . 'card_messages';
 
@@ -754,10 +594,8 @@ class wp_card_manager{
 	    );
 		wp_localize_script( 'plugin-js', 'ajaxObj', $ajaxObj );
 
-		// Fonts for message on design form
 		$fonts = array("Abril Fatface", "Acme", "Alfa Slab One", "Amatic SC", "Amiri", "Bangers", "Bebas Neue", "Bree Serif", "Cookie", "Dancing Script", "Fredoka One", "Great Vibes", "Lateef", "Lobster", "Luckiest Guy", "Merriweather", "Pacifico", "Passion One", "Playfair Display", "Rancho", "Roboto", "Roboto Slab", "Rochester", "Sacramento", "Sen");
 
-		// Colors for message on design form
 		$colors = array( "#000000", "#FFB400", "#E53D39", "#2C91DE", '#FFFFFF', '#970E65', '#650633', '#F3A2A3', '#D44F70', '#CA0B15', '#97070E', '#650508', '#F35D19', '#9E5727', '#D8B571', '#978454', '#65320C', '#8793D6', '#866AA5', '#552978', '#1D549F', '#073464', '#55B2AE', '#686868', '#D5D5D5', '#FFFAA3', '#C0CFAF', '#469E57' );
 		
 		$modal_id = uniqid( rand(), false );
@@ -766,7 +604,6 @@ class wp_card_manager{
 
 		list($card_img_width, $card_img_height, $type, $attr) = getimagesize($image);
 
-		// Determine design form dimension based on card image
 		if ( $card_img_width > $card_img_height ) {
 			$width = 320;
 			$height = 320 * $card_img_height / $card_img_width;
@@ -775,13 +612,10 @@ class wp_card_manager{
 			$height = 320 * $card_img_height / $card_img_width;
 		}
 
-		// Get shortcode attributes
-
 		extract(shortcode_atts(array(
 	      'show_image' => $default_show_image,
 	      'related'	=> '',
 	   	), $attributes));
-
 		$content = '<div class="card-container">';
 
 		if ( $show_image == 'true' ){
@@ -930,15 +764,6 @@ class wp_card_manager{
 		return $content;
 	}
 
-	/**
-	 * Plugin Save Ecard content
-	 *
-	 * Save Ecard content to send
-	 * Called by wp_ajax_save_card_content
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_save_card_content(){
 		global $wpdb;
 
@@ -948,7 +773,6 @@ class wp_card_manager{
 		$content 		= $_REQUEST['content'];
 		$card_related 	= $_REQUEST['card_related'];
 
-		// Generate ecard id that included to url
 		$card_id = 'e' . str_replace( '.', 'c', uniqid( '', true ) );
 
 		$ins_res = $wpdb->insert($tbl_cards, 
@@ -975,31 +799,20 @@ class wp_card_manager{
 		exit;
 	}
 
-	/**
-	 * Plugin Ecard View shortcode for receiver.
-	 *
-	 * Display received card with animation on receiver's side
-	 *
-	 * @global $wpdb
-	 *
-	 */
 	public function plugin_shortcode_ecardview() {
+
 		global $wpdb;
 		$card_page_id = get_option( 'card_view_page_id' );
 		$card_id = get_query_var( 'card_id' );
 		$tbl_ecard = $wpdb->prefix . 'ecards';
 
-		// Update card state to viewed
 		$wpdb->update( $tbl_ecard, array( 'card_viewed' => 'Yes' ), array( 'card_id' => $card_id ) );
-
-		// Get card object to show
 		$card_sql = "SELECT * FROM {$tbl_ecard} WHERE card_id='".$card_id."'";
 		$card_data = $wpdb->get_row( $card_sql );
 
 		$card_img = $card_data->card_img;
 		$card_related = explode( ',', $card_data->card_related );
 		
-		// Get related posts for this card
 		$related_args = array(
 			'post_type' => 'post',
 			'post__in'	=> $card_related,
@@ -1007,7 +820,6 @@ class wp_card_manager{
 
 		$related_posts = new WP_Query( $related_args );
 
-		// Determine card type by its dimension
 		list($card_img_width, $card_img_height, $type, $attr) = getimagesize($card_img);
 
 		$direction = ( $card_img_width > $card_img_height )?'layout-landscape':'layout-portrait';
@@ -1052,13 +864,6 @@ class wp_card_manager{
 		return $content;
 	}
 
-	/**
-	 * Plugin Cron Interval method
-	 *
-	 * Define cron event scheduler for plugin. 
-	 * Available period : 1 Month, 2 Months, 3 Months, 6 Months
-	 *
-	 */
 	public function plugin_add_cron_interval( $schedules ) {
 		$schedules['1_month'] = array(
 	        'interval' => 3600 * 24 * 30,
@@ -1083,13 +888,6 @@ class wp_card_manager{
 	    return $schedules;
 	}
 
-	/**
-	 * Plugin Delete Cards Method
-	 *
-	 * Delete created cards for cron event scheduler
-	 *
-	 * @global $wpdb
-	 */
 	public function plugin_delete_cards(){
 		global $wpdb;
 		$tbl_cards = $wpdb->prefix . 'ecards';
@@ -1099,8 +897,6 @@ class wp_card_manager{
 
 }
 
-
-// Create Plugin instance and start
 $card_obj = new wp_card_manager();
 $card_obj->instance();
 
