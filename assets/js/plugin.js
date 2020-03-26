@@ -68,15 +68,14 @@ jQuery(document).ready(function($){
 		var font_size_text = $(this).closest('.card-modal').find('textarea').css('font-size').replace(/"/g,"");
 		var align_text = $(this).closest('.card-modal').find('textarea').css('text-align').replace(/"/g,"");
 		var font_color = $(this).closest('.card-modal').find('textarea').css('color').replace(/"/g,"");
-		var card_related = $(this).closest('.card-modal').find('.card_related').val();
 
-		var content = $(this).closest('.card-modal').find('textarea').val();
+		var content = $("<div/>").html($(this).closest('.card-modal').find('textarea').val()).text();
 		content = '<div style="font-family:' + font_text + ';font-size:' + font_size_text + ';text-align:' + align_text + ';color:' + font_color + ';">' + content + '</div>';
 		$.ajax({
 			url: ajaxObj.ajaxurl,
 			dataType: 'json',
 			type: 'post',
-			data: { 'action':'save_card_content', 'card_img':card_img, 'content':content, 'card_related':card_related },
+			data: { 'action':'save_card_content', 'card_img':card_img, 'content':content},
 			success:function(data){
 				if ( data.result != "error"){
 					window.open( "https://web.whatsapp.com/send?text=" + data.url );
@@ -91,15 +90,14 @@ jQuery(document).ready(function($){
 		var font_size_text = $(this).closest('.card-modal').find('textarea').css('font-size').replace(/"/g,"");
 		var align_text = $(this).closest('.card-modal').find('textarea').css('text-align').replace(/"/g,"");
 		var font_color = $(this).closest('.card-modal').find('textarea').css('color').replace(/"/g,"");
-		var card_related = $(this).closest('.card-modal').find('.card_related').val();
 
-		var content = $(this).closest('.card-modal').find('textarea').val();
+		var content = $("<div/>").html($(this).closest('.card-modal').find('textarea').val()).text();
 		content = '<div style="font-family:' + font_text + ';font-size:' + font_size_text + ';text-align:' + align_text + ';color:' + font_color + ';">' + content + '</div>';
 		$.ajax({
 			url: ajaxObj.ajaxurl,
 			dataType: 'json',
 			type: 'post',
-			data: { 'action':'save_card_content', 'card_img':card_img, 'content':content, 'card_related':card_related },
+			data: { 'action':'save_card_content', 'card_img':card_img, 'content':content },
 			success:function(data){
 				if ( data.result != "error"){
 					window.open( "http://www.facebook.com/sharer.php?u=" + data.url );
@@ -114,15 +112,14 @@ jQuery(document).ready(function($){
 		var font_size_text = $(this).closest('.card-modal').find('textarea').css('font-size').replace(/"/g,"");
 		var align_text = $(this).closest('.card-modal').find('textarea').css('text-align').replace(/"/g,"");
 		var font_color = $(this).closest('.card-modal').find('textarea').css('color').replace(/"/g,"");
-		var card_related = $(this).closest('.card-modal').find('.card_related').val();
 
-		var content = $(this).closest('.card-modal').find('textarea').val();
+		var content = $("<div/>").html($(this).closest('.card-modal').find('textarea').val()).text();
 		content = '<div style="font-family:' + font_text + ';font-size:' + font_size_text + ';text-align:' + align_text + ';color:' + font_color + ';">' + content + '</div>';
 		$.ajax({
 			url: ajaxObj.ajaxurl,
 			dataType: 'json',
 			type: 'post',
-			data: { 'action':'save_card_content', 'card_img':card_img, 'content':content, 'card_related':card_related },
+			data: { 'action':'save_card_content', 'card_img':card_img, 'content':content },
 			success:function(data){
 				var tempElem = document.createElement("input");
 				document.body.appendChild(tempElem);
